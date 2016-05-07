@@ -1,5 +1,9 @@
 import sys
 
+"""
+Crea una lista de estrellas basado en todas las estrellas que estan en f1 y no en f2
+"""
+
 path1 = sys.argv[1]
 path2 = sys.argv[2]
 
