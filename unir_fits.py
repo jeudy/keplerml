@@ -17,7 +17,7 @@ archivos = listdir(dire)
 archivos.sort()
 
 datos = []
-for i in range(20):
+for i in range(20): #20 es la cantidad de caracteristicas que tienen las curvas de luz
     datos.append([])
 
 for archivo in archivos:
@@ -33,7 +33,7 @@ columnas_lista = [[k.split('=')[1].strip()[1:-1] for k in i] for i in columnas_l
 columnas_astropy = []
 
 for i in range(len(columnas_lista)):
-    if len(columnas_lista[i]) == 3:
+    if len(columnas_lista[i]) == 3: #Sucede que esta caracteristica no tiene datos de unidades
         columnas_astropy.append(fits.Column(name=columnas_lista[i][0], format=columnas_lista[i][1], disp=columnas_lista[i][2], array=datos[i]))
     else:
         columnas_astropy.append(fits.Column(name=columnas_lista[i][0], format=columnas_lista[i][1], unit=columnas_lista[i][2], disp=columnas_lista[i][3], array=datos[i]))
