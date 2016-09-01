@@ -1,0 +1,10 @@
+BeautifulSoup==3.2.1
+MySQL-python==1.2.5
+Pillow==2.5.3
+SQLAlchemy==1.0.14
+argparse==1.2.1
+astroML==0.2
+astroML-addons==0.2.1
+astropy==0.4.1
+numpy==1.8.2
+wsgiref==0.1.2
