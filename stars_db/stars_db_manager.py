@@ -41,6 +41,9 @@ class StarsDBManager(object):
 
         star_metadata_table = Table("stars_metadata", metadata,
                                     Column('kepler_id', String(100), primary_key=True),
+                                    Column('source_filename', String(100), primary_key=True),
+                                    Column('confirmed', Boolean, nullable=False),
+                                    Column('negative', Boolean, nullable=False),
                                     Column('channel', Integer, nullable=True),
                                     Column('sky_group', Integer, nullable=True),
                                     Column('module', Integer, nullable=True),
@@ -73,6 +76,7 @@ class StarsDBManager(object):
 
         star_lightcurve_table = Table("star_lightcurve", metadata,
                                     Column('kepler_id', String(100), primary_key=True),
+                                    Column('source_filename', String(100), primary_key=True),
                                     Column('exposure', Float, nullable=False),
                                     Column('bjd_ref_integer', Integer, nullable=True),  # BJDREFI
                                     Column('bjd_ref_fraction', Float, nullable=True),  # BJDREFF
@@ -129,6 +133,23 @@ class StarsDBManager(object):
 
         connection.close()
 
+
+    def insert_star_lightcurve_metadata(self, statements):
+        """
+        statements: es una lista de diccionarios donde cada key es una columna de la tabla
+        """
+
+        metadata = self.get_binded_metadata()
+
+        star_lightcurve_table = metadata.tables['star_lightcurve']
+
+        connection = engine.connect()
+
+        trans = connection.begin()
+        result = connection.execute(star_lightcurve_table.insert(), statements)
+        trans.commit()
+
+        connection.close()
 
 
 if __name__ == '__main__':
