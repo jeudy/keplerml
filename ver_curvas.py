@@ -23,6 +23,7 @@ archivos = os.listdir(path)
 
 def update(i):
     filename = archivos[i].split('-')[0].replace('kplr', '')
+    print "Revisando ", filename
     ax.set_title("Kepler ID: {}".format(filename))
     arreglo = lightcurve(path + "/" + archivos[i])
     ax.set_ylim(min(arreglo[3]), max(arreglo[3]))
@@ -30,6 +31,6 @@ def update(i):
     sp.set_data(arreglo[0], arreglo[3])
     return sp,None
 
-ani = animation.FuncAnimation(fig, update, frames=len(archivos), interval=5000, repeat=False)
+ani = animation.FuncAnimation(fig, update, frames=len(archivos), interval=2000, repeat=False)
 
 plt.show()

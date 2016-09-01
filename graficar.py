@@ -15,7 +15,10 @@ def graficar(archivo):
     plt.ylabel('Flux')
     plt.xlabel('Time')
     plt.title(archivo)
-    plt.savefig(archivo+".png", bbox_inches="tight")
+    # plt.savefig(archivo+".png", bbox_inches="tight")
+
+    plt.show()
+
     plt.gcf().clear()
 
 path = sys.argv[1]
