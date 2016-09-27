@@ -1,10 +1,9 @@
-import sys
 from os import listdir
 from os.path import join
 
 from astropy.io import fits
 
-def get_list_of_dicts(dire)
+def get_list_of_dicts(dire):
 	"""
 	Obtiene las listas de diccionarios para uso con las funciones de stars_db_manager
 
@@ -21,7 +20,7 @@ def get_list_of_dicts(dire)
 		list_of_dicts_metadata.append(get_star_metadata(archivo))
 	return (list_of_dicts_metadata, list_of_dicts_lightcurve_metadata)
 
-def get_star_lightcurve_metadata(fits_arch)
+def get_star_lightcurve_metadata(fits_arch):
 	"""
 	Obtiene los metadatos de la curva de luz de un archivo fits para uso con las funciones de stars_db_manager
 
@@ -45,7 +44,7 @@ def get_star_lightcurve_metadata(fits_arch)
                     'absolute_time_error':hdu[1].header["TIERABSO"],
                     'integration_time':hdu[1].header["INT_TIME"],
                     'readout_time':hdu[1].header["READTIME"],
-                    'frame_time':hdu[1].header["FRAMETIME"],
+                    'frame_time':hdu[1].header["FRAMETIM"],
                     'number_of_frames':hdu[1].header["NUM_FRM"],
                     'time_resolution':hdu[1].header["TIMEDEL"],
                     'observation_date_start':hdu[1].header["DATE-OBS"],
@@ -65,7 +64,7 @@ def get_star_lightcurve_metadata(fits_arch)
 	return lightcurve_metadata
 
 
-def get_star_metadata(fits_arch)
+def get_star_metadata(fits_arch):
 	"""
 	Obtiene los metadatos de un archivo fits para uso con las funciones de stars_db_manager
 
@@ -74,8 +73,8 @@ def get_star_metadata(fits_arch)
 	hdu = fits.open(fits_arch)
 	metadata = {'kepler_id':hdu[0].header["KEPLERID"],
                     'source_filename':fits_arch,
-                    #'confirmed':hdu[0].header["BJDREFI"],
-                    #'negative':hdu[0].header["BJDREFF"],
+                    'confirmed':False, #por ahora
+                    'negative':False,  #por ahora
                     'channel':hdu[0].header["CHANNEL"],
                     'sky_group':hdu[0].header["SKYGROUP"],
                     'module':hdu[0].header["MODULE"],

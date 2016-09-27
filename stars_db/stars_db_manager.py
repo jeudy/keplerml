@@ -1,5 +1,6 @@
 import sys
 import datetime
+from get_metadata import get_list_of_dicts
 from sqlalchemy import MetaData, Table, Column, String, Integer, Boolean, Float, DateTime, UniqueConstraint, ForeignKey
 from sqlalchemy import create_engine, select, and_, or_
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -162,3 +163,8 @@ if __name__ == '__main__':
 
     if accion == "crear":
         StarsDBManager().create_schema()
+    elif accion == "insertar":
+	dire = sys.argv[2]
+	tup = get_list_of_dicts(dire)
+	insert_star_metadata(tup[0])
+	insert_star_lightcurve_metadata(tup[1])
