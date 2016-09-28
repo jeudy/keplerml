@@ -74,7 +74,7 @@ def get_star_metadata(fits_arch):
     metadata = {'kepler_id':hdu[0].header["KEPLERID"],
                     'source_filename':fits_arch,
                     'confirmed':check_if_confirmed(hdu[0].header["KEPLERID"]),
-                    'negative':check_if_false_positive(hdu[0].header["KEPLERID"),
+                    'negative':check_if_false_positive(hdu[0].header["KEPLERID"]),
                     'channel':hdu[0].header["CHANNEL"],
                     'sky_group':hdu[0].header["SKYGROUP"],
                     'module':hdu[0].header["MODULE"],
@@ -104,14 +104,14 @@ def get_star_metadata(fits_arch):
     hdu.close()
     return metadata
 
-def check_if_confirmed(kplr_id)
+def check_if_confirmed(kplr_id):
     with open('Kepler_confirmed_list.txt', 'r') as f:
         for lines in f:
             if "kplr{zeroes}{ids}".format(zeroes='0'*(9-len(kplr_id)), ids=kplr_id) == lines.strip():
                 return True
     return False
 
-def check_if_false_positive(kplr_id)
+def check_if_false_positive(kplr_id):
     with open('false_positives_list.txt', 'r') as f:
         for lines in f:
             if "kplr{zeroes}{ids}".format(zeroes='0'*(9-len(kplr_id)), ids=kplr_id) == lines.strip():
