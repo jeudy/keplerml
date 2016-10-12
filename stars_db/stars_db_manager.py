@@ -6,7 +6,8 @@ from sqlalchemy import create_engine, select, and_, or_
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 DB_USER = 'root'
-DB_PASS = 'jBV205760292'
+#DB_PASS = 'jBV205760292'
+DB_PASS = 'cinespa'
 DB_DATABASE = 'kepler_stars'
 DB_HOST = '127.0.0.1'
 
@@ -90,14 +91,14 @@ class StarsDBManager(object):
                                     Column('deadtime_correction', Float, nullable=True), # DEADC
                                     Column('bin_time', Float, nullable=True), # TIMEPIXR
                                     Column('relative_time_error', Float, nullable=True), # TIERRELA
-                                    Column('absolute_time_error', Float, nullable=True), # TIERABSO
+                                    #Column('absolute_time_error', Float, nullable=True), # TIERABSO
                                     Column('integration_time', Float, nullable=False), # INT_TIME
                                     Column('readout_time', Float, nullable=True), # READTIME
                                     Column('frame_time', Float, nullable=True), # FRAMETIM
                                     Column('number_of_frames', Integer, nullable=False), # NUM_FRM
                                     Column('time_resolution', Float, nullable=True), # TIMEDEL
-                                    Column('observation_date_start', DateTime, nullable=False), # DATE-OBS
-                                    Column('observation_date_end', DateTime, nullable=False), # DATE-END
+                                    #Column('observation_date_start', DateTime, nullable=False), # DATE-OBS
+                                    #Column('observation_date_end', DateTime, nullable=False), # DATE-END
                                     Column('background_substracted', Boolean, nullable=False), # BACKAPP
                                     Column('deadtime_applied', Boolean, nullable=False), # DEADAPP
                                     Column('vignetting_correction', Boolean, nullable=False), # DEADAPP
@@ -164,7 +165,7 @@ if __name__ == '__main__':
     if accion == "crear":
         StarsDBManager().create_schema()
     elif accion == "insertar":
-	dire = sys.argv[2]
-	tup = get_list_of_dicts(dire)
-	insert_star_metadata(tup[0])
-	insert_star_lightcurve_metadata(tup[1])
+        dire = sys.argv[2]
+        tup = get_list_of_dicts(dire)
+        StarsDBManager().insert_star_metadata(tup[0])
+        StarsDBManager().insert_star_lightcurve_metadata(tup[1])
