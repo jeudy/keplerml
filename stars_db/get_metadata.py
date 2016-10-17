@@ -41,14 +41,14 @@ def get_star_lightcurve_metadata(fits_arch):
                     'deadtime_correction':hdu[1].header["DEADC"],
                     'bin_time':hdu[1].header["TIMEPIXR"],
                     'relative_time_error':hdu[1].header["TIERRELA"],
-#                    'absolute_time_error':hdu[1].header["TIERABSO"],
+                    'absolute_time_error':check_if_null(hdu[1].header["TIERABSO"]),
                     'integration_time':hdu[1].header["INT_TIME"],
                     'readout_time':hdu[1].header["READTIME"],
                     'frame_time':hdu[1].header["FRAMETIM"],
                     'number_of_frames':hdu[1].header["NUM_FRM"],
                     'time_resolution':hdu[1].header["TIMEDEL"],
-                    #'observation_date_start':hdu[1].header["DATE-OBS"],
-                    #'observation_date_end':hdu[1].header["DATE-END"],
+                    'observation_date_start':format_time_data(hdu[1].header["DATE-OBS"]),
+                    'observation_date_end':format_time_data(hdu[1].header["DATE-END"]),
                     'background_substracted':hdu[1].header["BACKAPP"],
                     'deadtime_applied':hdu[1].header["DEADAPP"],
                     'vignetting_correction':hdu[1].header["VIGNAPP"],
@@ -63,6 +63,13 @@ def get_star_lightcurve_metadata(fits_arch):
     hdu.close()
     return lightcurve_metadata
 
+def format_time_data(timestamp):
+    """
+    Cambia el formato de tiempo que se utiliza en los fits a uno que se utiliza en MySQL
+
+    (str) timestamp: Tiempo que se va a cambiar
+    """
+    return timestamp.replace('T', ' ').replace('Z', '')
 
 def get_star_metadata(fits_arch):
     """
@@ -117,3 +124,9 @@ def check_if_false_positive(kplr_id):
             if "kplr{zeroes}{ids}".format(zeroes='0'*(9-len(str(kplr_id))), ids=kplr_id) == lines.strip():
                 return True
     return False
+
+def check_if_null(abt):
+    if str(type(abt)) == "<class 'astropy.io.fits.card.Undefined'>":
+        return None
+    else:
+        return abt
