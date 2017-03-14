@@ -8,6 +8,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import IntegrityError
 from os import listdir
 from os.path import join
+import warnings
 
 DB_USER = 'root'
 DB_PASS = 'jBV205760292'
@@ -127,6 +128,9 @@ class StarsDBManager(object):
         statements: es una lista de diccionarios donde cada key es una columna de la tabla
         """
 
+        if not verbose:
+             warnings.filterwarnings("ignore")
+
         try:
 
             metadata = self.get_binded_metadata()
@@ -148,7 +152,9 @@ class StarsDBManager(object):
         """
         statements: es una lista de diccionarios donde cada key es una columna de la tabla
         """
-
+        if not verbose:
+             warnings.filterwarnings("ignore")
+             
         try:
 
             metadata = self.get_binded_metadata()
@@ -198,16 +204,17 @@ if __name__ == '__main__':
         list_of_dicts_metadata = []
 
         for archivo in archivos:
+
+            i += 1
+            list_of_dicts_lightcurve_metadata.append(get_star_lightcurve_metadata(archivo))
+            list_of_dicts_metadata.append(get_star_metadata(archivo))
+
             if i > 0 and i % 100 == 0:
                 print "Procesando {0} de {1}".format(i, len(archivos))
                 StarsDBManager().insert_star_metadata(list_of_dicts_metadata)
                 StarsDBManager().insert_star_lightcurve_metadata(list_of_dicts_lightcurve_metadata)
                 list_of_dicts_lightcurve_metadata = []
                 list_of_dicts_metadata = []
-            else:
-                i += 1
-                list_of_dicts_lightcurve_metadata.append(get_star_lightcurve_metadata(archivo))
-                list_of_dicts_metadata.append(get_star_metadata(archivo))
 
         # Procesa el remanente
 
