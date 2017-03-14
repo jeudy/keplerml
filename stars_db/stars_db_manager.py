@@ -1,13 +1,17 @@
 import sys
 import datetime
-from get_metadata import get_list_of_dicts
+import time
+from get_metadata import get_list_of_dicts, get_star_lightcurve_metadata, get_star_metadata
 from sqlalchemy import MetaData, Table, Column, String, Integer, Boolean, Float, DateTime, UniqueConstraint, ForeignKey
 from sqlalchemy import create_engine, select, and_, or_
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.exc import IntegrityError
+from os import listdir
+from os.path import join
 
 DB_USER = 'root'
-#DB_PASS = 'jBV205760292'
-DB_PASS = 'cinespa'
+DB_PASS = 'jBV205760292'
+#DB_PASS = 'cinespa'
 DB_DATABASE = 'kepler_stars'
 DB_HOST = '127.0.0.1'
 
@@ -118,40 +122,49 @@ class StarsDBManager(object):
         metadata.create_all(engine)
 
 
-    def insert_star_metadata(self, statements):
+    def insert_star_metadata(self, statements, verbose=False):
         """
         statements: es una lista de diccionarios donde cada key es una columna de la tabla
         """
 
-        metadata = self.get_binded_metadata()
+        try:
 
-        star_metadata_table = metadata.tables['stars_metadata']
+            metadata = self.get_binded_metadata()
 
-        connection = engine.connect()
+            star_metadata_table = metadata.tables['stars_metadata']
 
-        trans = connection.begin()
-        result = connection.execute(star_metadata_table.insert(), statements)
-        trans.commit()
+            connection = engine.connect()
 
-        connection.close()
+            trans = connection.begin()
+            result = connection.execute(star_metadata_table.insert(), statements)
+            trans.commit()
 
+            connection.close()
+        except IntegrityError:
+            if verbose:
+                print "ERROR: {0}".format(statements)
 
-    def insert_star_lightcurve_metadata(self, statements):
+    def insert_star_lightcurve_metadata(self, statements, verbose=False):
         """
         statements: es una lista de diccionarios donde cada key es una columna de la tabla
         """
 
-        metadata = self.get_binded_metadata()
+        try:
 
-        star_lightcurve_table = metadata.tables['star_lightcurve']
+            metadata = self.get_binded_metadata()
 
-        connection = engine.connect()
+            star_lightcurve_table = metadata.tables['star_lightcurve']
 
-        trans = connection.begin()
-        result = connection.execute(star_lightcurve_table.insert(), statements)
-        trans.commit()
+            connection = engine.connect()
 
-        connection.close()
+            trans = connection.begin()
+            result = connection.execute(star_lightcurve_table.insert(), statements)
+            trans.commit()
+
+            connection.close()
+        except IntegrityError:
+            if verbose:
+                print "ERROR: {0}".format(statements)
 
 
 if __name__ == '__main__':
@@ -164,8 +177,43 @@ if __name__ == '__main__':
 
     if accion == "crear":
         StarsDBManager().create_schema()
-    elif accion == "insertar":
-        dire = sys.argv[2]
-        tup = get_list_of_dicts(dire)
+    elif accion == "bruteforce":
+        path = sys.argv[2]
+        tup = get_list_of_dicts(path)
         StarsDBManager().insert_star_metadata(tup[0])
         StarsDBManager().insert_star_lightcurve_metadata(tup[1])
+    elif accion == 'insertar':
+        path = sys.argv[2]
+        archivos = listdir(path)
+        for i in range(len(archivos)):
+            archivos[i] = join(path, archivos[i])
+
+        print "Total de archivos en directorio: {0}".format(len(archivos))
+
+        raw_input('Presione ENTER para empezar...')
+
+        i = 0
+
+        list_of_dicts_lightcurve_metadata = []
+        list_of_dicts_metadata = []
+
+        for archivo in archivos:
+            if i > 0 and i % 100 == 0:
+                print "Procesando {0} de {1}".format(i, len(archivos))
+                StarsDBManager().insert_star_metadata(list_of_dicts_metadata)
+                StarsDBManager().insert_star_lightcurve_metadata(list_of_dicts_lightcurve_metadata)
+                list_of_dicts_lightcurve_metadata = []
+                list_of_dicts_metadata = []
+            else:
+                i += 1
+                list_of_dicts_lightcurve_metadata.append(get_star_lightcurve_metadata(archivo))
+                list_of_dicts_metadata.append(get_star_metadata(archivo))
+
+        # Procesa el remanente
+
+        if list_of_dicts_lightcurve_metadata:
+            StarsDBManager().insert_star_metadata(list_of_dicts_metadata)
+            StarsDBManager().insert_star_lightcurve_metadata(list_of_dicts_lightcurve_metadata)
+
+
+        print "DONE!"
