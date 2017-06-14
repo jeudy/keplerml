@@ -11,8 +11,8 @@ from os.path import join
 import warnings
 
 DB_USER = 'root'
-DB_PASS = 'jBV205760292'
-#DB_PASS = 'cinespa'
+#DB_PASS = 'jBV205760292'
+DB_PASS = 'cinespa'
 DB_DATABASE = 'kepler_stars'
 DB_HOST = '127.0.0.1'
 
@@ -55,12 +55,16 @@ class StarsDBManager(object):
                                     Column('sky_group', Integer, nullable=True),
                                     Column('module', Integer, nullable=True),
                                     Column('output', Integer, nullable=True),
-                                    Column('quarter', Integer, nullable=False),
-                                    Column('season', Integer, nullable=False),
+                                    #Column('quarter', Integer, nullable=False),
+                                    Column('quarter', Integer, nullable=True),
+                                    #Column('season', Integer, nullable=False),
+                                    Column('season', Integer, nullable=True),
                                     Column('data_release', Integer, nullable=True),
                                     Column('observing_mode', String(255), nullable=True),
-                                    Column('coordinates_ra', Float, nullable=False),
-                                    Column('coordinates_dec', Float, nullable=False),
+                                    #Column('coordinates_ra', Float, nullable=False),
+                                    Column('coordinates_ra', Float, nullable=True),
+                                    #Column('coordinates_dec', Float, nullable=False),
+                                    Column('coordinates_dec', Float, nullable=True),
                                     Column('ssds_g_magnitude', Float, nullable=True),
                                     Column('ssds_r_magnitude', Float, nullable=True),
                                     Column('ssds_i_magnitude', Float, nullable=True),
@@ -68,15 +72,19 @@ class StarsDBManager(object):
                                     Column('j_magnitude', Float, nullable=True),
                                     Column('h_magnitude', Float, nullable=True),
                                     Column('k_magnitude', Float, nullable=True),
-                                    Column('kepler_magnitude', Float, nullable=False),
+                                    #Column('kepler_magnitude', Float, nullable=False),
+                                    Column('kepler_magnitude', Float, nullable=True),
                                     Column('gr_color', Float, nullable=True),
                                     Column('jk_color', Float, nullable=True),
                                     Column('gk_color', Float, nullable=True),
-                                    Column('effective_temperature', Float, nullable=False),
+                                    #Column('effective_temperature', Float, nullable=False),
+                                    Column('effective_temperature', Float, nullable=True),
                                     Column('surface_gravity', Float, nullable=True),
                                     Column('fe_h_metallicity', Float, nullable=True),
-                                    Column('radius', Float, nullable=False),
-                                    Column('load_timestamp', DateTime, nullable=False),)
+                                    #Column('radius', Float, nullable=False),
+                                    #Column('load_timestamp', DateTime, nullable=False)
+                                    Column('radius', Float, nullable=True),
+                                    Column('load_timestamp', DateTime, nullable=True),)
 
         # Tabla para almacenar los metadatos de la curva de luz
         # Del HDU[1].headers de los FITS files
@@ -84,31 +92,47 @@ class StarsDBManager(object):
         star_lightcurve_table = Table("star_lightcurve", metadata,
                                     Column('kepler_id', String(100), primary_key=True),
                                     Column('source_filename', String(100), primary_key=True),
-                                    Column('exposure', Float, nullable=False),
+                                    #Column('exposure', Float, nullable=False),
+                                    Column('exposure', Float, nullable=True),
                                     Column('bjd_ref_integer', Integer, nullable=True),  # BJDREFI
                                     Column('bjd_ref_fraction', Float, nullable=True),  # BJDREFF
-                                    Column('time_elapsed', Float, nullable=False), # TELAPSE
-                                    Column('time_live', Float, nullable=False), # LIVETIME
-                                    Column('time_start', Float, nullable=False), # TSTART
-                                    Column('time_stop', Float, nullable=False), # TSTOP
-                                    Column('lc_start', Float, nullable=False), # LC_START
-                                    Column('lc_end', Float, nullable=False), # LC_END
+                                    #Column('time_elapsed', Float, nullable=False), # TELAPSE
+                                    Column('time_elapsed', Float, nullable=True), # TELAPSE
+                                    #Column('time_live', Float, nullable=False), # LIVETIME
+                                    #Column('time_start', Float, nullable=False), # TSTART
+                                    #Column('time_stop', Float, nullable=False), # TSTOP
+                                    #Column('lc_start', Float, nullable=False), # LC_START
+                                    #Column('lc_end', Float, nullable=False), # LC_END
+                                    Column('time_live', Float, nullable=True), # LIVETIME
+                                    Column('time_start', Float, nullable=True), # TSTART
+                                    Column('time_stop', Float, nullable=True), # TSTOP
+                                    Column('lc_start', Float, nullable=True), # LC_START
+                                    Column('lc_end', Float, nullable=True), # LC_END
                                     Column('deadtime_correction', Float, nullable=True), # DEADC
                                     Column('bin_time', Float, nullable=True), # TIMEPIXR
                                     Column('relative_time_error', Float, nullable=True), # TIERRELA
                                     Column('absolute_time_error', Float, nullable=True), # TIERABSO
-                                    Column('integration_time', Float, nullable=False), # INT_TIME
+                                    #Column('integration_time', Float, nullable=False), # INT_TIME
+                                    Column('integration_time', Float, nullable=True), # INT_TIME
                                     Column('readout_time', Float, nullable=True), # READTIME
                                     Column('frame_time', Float, nullable=True), # FRAMETIM
-                                    Column('number_of_frames', Integer, nullable=False), # NUM_FRM
+                                    #Column('number_of_frames', Integer, nullable=False), # NUM_FRM
+                                    Column('number_of_frames', Integer, nullable=True), # NUM_FRM
                                     Column('time_resolution', Float, nullable=True), # TIMEDEL
-                                    Column('observation_date_start', DateTime, nullable=False), # DATE-OBS
-                                    Column('observation_date_end', DateTime, nullable=False), # DATE-END
-                                    Column('background_substracted', Boolean, nullable=False), # BACKAPP
-                                    Column('deadtime_applied', Boolean, nullable=False), # DEADAPP
-                                    Column('vignetting_correction', Boolean, nullable=False), # DEADAPP
-                                    Column('gain', Float, nullable=False), # GAIN
-                                    Column('read_noise', Float, nullable=False), # READNOIS
+                                    #Column('observation_date_start', DateTime, nullable=False), # DATE-OBS
+                                    #Column('observation_date_end', DateTime, nullable=False), # DATE-END
+                                    #Column('background_substracted', Boolean, nullable=False), # BACKAPP
+                                    #Column('deadtime_applied', Boolean, nullable=False), # DEADAPP
+                                    #Column('vignetting_correction', Boolean, nullable=False), # DEADAPP
+                                    #Column('gain', Float, nullable=False), # GAIN
+                                    #Column('read_noise', Float, nullable=False), # READNOIS
+                                    Column('observation_date_start', DateTime, nullable=True), # DATE-OBS
+                                    Column('observation_date_end', DateTime, nullable=True), # DATE-END
+                                    Column('background_substracted', Boolean, nullable=True), # BACKAPP
+                                    Column('deadtime_applied', Boolean, nullable=True), # DEADAPP
+                                    Column('vignetting_correction', Boolean, nullable=True), # DEADAPP
+                                    Column('gain', Float, nullable=True), # GAIN
+                                    Column('read_noise', Float, nullable=True), # READNOIS
                                     Column('read_per_cadence', Integer, nullable=True), # NREADOUT
                                     Column('mean_black', Integer, nullable=True), # MEANBLCK
                                     Column('long_cadence_fixed_offset', Integer, nullable=True), # LCFXDOFF
@@ -202,12 +226,14 @@ if __name__ == '__main__':
 
         list_of_dicts_lightcurve_metadata = []
         list_of_dicts_metadata = []
-
+        suspects = file("suspects.sh", "w")        
+        suspects.write("#!/bin/bash \n")
         for archivo in archivos:
 
             i += 1
             list_of_dicts_lightcurve_metadata.append(get_star_lightcurve_metadata(archivo))
             list_of_dicts_metadata.append(get_star_metadata(archivo))
+            suspects.write("cp " + archivo + " ../../prueba/ \n")
 
             if i > 0 and i % 100 == 0:
                 print "Procesando {0} de {1}".format(i, len(archivos))
