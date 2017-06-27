@@ -47,7 +47,7 @@ class StarsDBManager(object):
         # Tabla para almacenar los metadatos de la estrella
         # Del HDU[0].headers de los FITS files
 
-        star_metadata_table = Table("stars_metadata_ex", metadata,
+        star_metadata_table = Table("stars_metadata", metadata,
                                     Column('kepler_id', String(100), primary_key=True),
                                     Column('source_filename', String(100), primary_key=True),
                                     Column('confirmed', Boolean, nullable=False),
@@ -90,7 +90,7 @@ class StarsDBManager(object):
         # Tabla para almacenar los metadatos de la curva de luz
         # Del HDU[1].headers de los FITS files
 
-        star_lightcurve_table = Table("star_lightcurve_ex", metadata,
+        star_lightcurve_table = Table("star_lightcurve", metadata,
                                     Column('kepler_id', String(100), primary_key=True),
                                     Column('source_filename', String(100), primary_key=True),
                                     #Column('exposure', Float, nullable=False),
@@ -160,7 +160,7 @@ class StarsDBManager(object):
 
             metadata = self.get_binded_metadata()
 
-            star_metadata_table = metadata.tables['stars_metadata_ex']
+            star_metadata_table = metadata.tables['stars_metadata']
 
             connection = engine.connect()
 
@@ -184,7 +184,7 @@ class StarsDBManager(object):
 
             metadata = self.get_binded_metadata()
 
-            star_lightcurve_table = metadata.tables['star_lightcurve_ex']
+            star_lightcurve_table = metadata.tables['star_lightcurve']
 
             connection = engine.connect()
 
@@ -201,8 +201,8 @@ class StarsDBManager(object):
         
         metadata = self.get_binded_metadata()        
         
-        star_lightcurve_table = metadata.tables['star_lightcurve_ex']
-        star_metadata_table = metadata.tables['stars_metadata_ex']
+        star_lightcurve_table = metadata.tables['star_lightcurve']
+        star_metadata_table = metadata.tables['stars_metadata']
 
         source_filename = star_lightcurve_table.columns['source_filename']
     
@@ -236,7 +236,7 @@ class StarsDBManager(object):
         
         metadata = self.get_binded_metadata()        
         
-        star_metadata_table = metadata.tables['stars_metadata_ex']    
+        star_metadata_table = metadata.tables['stars_metadata']    
         confirmed = star_metadata_table.columns['confirmed']        
         negative = star_metadata_table.columns['negative']
 
