@@ -1,6 +1,7 @@
 import sys
 import datetime
 import time
+import csv
 from get_metadata import get_list_of_dicts, get_star_lightcurve_metadata, get_star_metadata
 from sqlalchemy import MetaData, Table, Column, String, Integer, Boolean, Float, DateTime, UniqueConstraint, ForeignKey
 from sqlalchemy import create_engine, select, and_, or_
@@ -46,7 +47,7 @@ class StarsDBManager(object):
         # Tabla para almacenar los metadatos de la estrella
         # Del HDU[0].headers de los FITS files
 
-        star_metadata_table = Table("stars_metadata", metadata,
+        star_metadata_table = Table("stars_metadata_ex", metadata,
                                     Column('kepler_id', String(100), primary_key=True),
                                     Column('source_filename', String(100), primary_key=True),
                                     Column('confirmed', Boolean, nullable=False),
@@ -89,7 +90,7 @@ class StarsDBManager(object):
         # Tabla para almacenar los metadatos de la curva de luz
         # Del HDU[1].headers de los FITS files
 
-        star_lightcurve_table = Table("star_lightcurve", metadata,
+        star_lightcurve_table = Table("star_lightcurve_ex", metadata,
                                     Column('kepler_id', String(100), primary_key=True),
                                     Column('source_filename', String(100), primary_key=True),
                                     #Column('exposure', Float, nullable=False),
@@ -159,7 +160,7 @@ class StarsDBManager(object):
 
             metadata = self.get_binded_metadata()
 
-            star_metadata_table = metadata.tables['stars_metadata']
+            star_metadata_table = metadata.tables['stars_metadata_ex']
 
             connection = engine.connect()
 
@@ -183,7 +184,7 @@ class StarsDBManager(object):
 
             metadata = self.get_binded_metadata()
 
-            star_lightcurve_table = metadata.tables['star_lightcurve']
+            star_lightcurve_table = metadata.tables['star_lightcurve_ex']
 
             connection = engine.connect()
 
@@ -195,6 +196,62 @@ class StarsDBManager(object):
         except IntegrityError:
             if verbose:
                 print "ERROR: {0}".format(statements)
+
+    def clean_filenames(self):
+        
+        metadata = self.get_binded_metadata()        
+        
+        star_lightcurve_table = metadata.tables['star_lightcurve_ex']
+        star_metadata_table = metadata.tables['stars_metadata_ex']
+
+        source_filename = star_lightcurve_table.columns['source_filename']
+    
+        connection = engine.connect()
+        
+        trans = connection.begin()
+        result = connection.execute(select([star_lightcurve_table.c.source_filename]))
+        
+        for c in result:
+            name = c[0]
+            connection.execute(star_lightcurve_table.update().where(star_lightcurve_table.c.source_filename == name).\
+                                values(source_filename = name.split("/")[-1]))
+
+        result = connection.execute(select([star_metadata_table.c.source_filename]))
+        
+        source_filename = star_metadata_table.columns['source_filename']        
+
+        for col in result:
+            name = col[0]
+            connection.execute(star_metadata_table.update().where(star_metadata_table.c.source_filename == name).\
+                                values(source_filename = name.split("/")[-1]))
+
+        trans.commit()
+        result.close()
+        connection.close()
+
+    def mark_false_positives(self, koi_dict):
+        """
+        koi_dict: es un diccionario de kepler_ids que contienen true o false, dependiendo de si es un falso positivo o no 
+        """
+        
+        metadata = self.get_binded_metadata()        
+        
+        star_metadata_table = metadata.tables['stars_metadata_ex']    
+        confirmed = star_metadata_table.columns['confirmed']        
+        negative = star_metadata_table.columns['negative']
+
+        connection = engine.connect()
+        trans = connection.begin()
+        
+        kepids = koi_dict.keys()
+        
+        for kepid in kepids:
+            connection.execute(star_metadata_table.update().where(star_metadata_table.c.kepler_id == kepid).\
+                                values(confirmed = koi_dict[kepid]))
+            connection.execute(star_metadata_table.update().where(star_metadata_table.c.kepler_id == kepid).\
+                                values(negative = not koi_dict[kepid]))
+        trans.commit()
+        connection.close()        
 
 
 if __name__ == '__main__':
@@ -250,3 +307,27 @@ if __name__ == '__main__':
 
 
         print "DONE!"
+    
+    elif accion == "limpiar":
+        StarsDBManager().clean_filenames()
+
+    elif accion == "falsos":
+        koifile = open(sys.argv[2])
+
+        koicsv = csv.reader(koifile)
+        koicsv.next()
+
+        koidict = {}
+
+        for row in koicsv:
+            if row[2] == 'CONFIRMED':
+                koidict[row[1]] = True
+            elif row[2] == 'FALSE POSITIVE':
+                koidict[row[1]] = False
+        
+        koifile.close()
+        StarsDBManager().mark_false_positives(koidict)
+
+
+
+
