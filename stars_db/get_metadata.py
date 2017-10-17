@@ -26,7 +26,13 @@ def get_star_lightcurve_metadata(fits_arch):
 
     (str) fits_arch: Archivo del que se obtendran los metadatos
     """
-    hdu = fits.open(fits_arch)
+
+    try:
+        hdu = fits.open(fits_arch)
+    except IOError as ex:
+        print "Error procesando FIT file: {0} - {1}".format(fits_arch, str(ex))
+        return {}
+
     lightcurve_metadata = {'kepler_id':hdu[1].header["KEPLERID"],
                     'source_filename':fits_arch,
                     'exposure':hdu[1].header["EXPOSURE"],
@@ -77,7 +83,11 @@ def get_star_metadata(fits_arch):
 
     (str) fits_arch: Archivo del que se obtendran los metadatos
     """
-    hdu = fits.open(fits_arch)
+    try:
+        hdu = fits.open(fits_arch)
+    except IOError as ex:
+        print "Error procesando FIT file: {0} - {1}".format(fits_arch, str(ex))
+        return {}
     metadata = {'kepler_id':hdu[0].header["KEPLERID"],
                     'source_filename':fits_arch,
                     'confirmed':check_if_confirmed(hdu[0].header["KEPLERID"]),

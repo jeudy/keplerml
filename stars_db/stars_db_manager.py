@@ -1,6 +1,7 @@
 import sys
 import datetime
 import time
+import gc
 from get_metadata import get_list_of_dicts, get_star_lightcurve_metadata, get_star_metadata
 from sqlalchemy import MetaData, Table, Column, String, Integer, Boolean, Float, DateTime, UniqueConstraint, ForeignKey
 from sqlalchemy import create_engine, select, and_, or_
@@ -154,7 +155,7 @@ class StarsDBManager(object):
         """
         if not verbose:
              warnings.filterwarnings("ignore")
-             
+
         try:
 
             metadata = self.get_binded_metadata()
@@ -191,28 +192,44 @@ if __name__ == '__main__':
     elif accion == 'insertar':
         path = sys.argv[2]
         archivos = listdir(path)
+        archivosProcess = []
+        not_fits = 0
         for i in range(len(archivos)):
-            archivos[i] = join(path, archivos[i])
+            if archivos[i].endswith(".fits"):
+                archivosProcess.append(join(path, archivos[i]))
+            else:
+                not_fits += 1
 
-        print "Total de archivos en directorio: {0}".format(len(archivos))
+        print "Total de archivos en directorio: {0}. Not fits: {1}".format(len(archivosProcess), not_fits)
 
-        raw_input('Presione ENTER para empezar...')
+        # raw_input('Presione ENTER para empezar...')
 
         i = 0
 
         list_of_dicts_lightcurve_metadata = []
         list_of_dicts_metadata = []
 
-        for archivo in archivos:
+        for archivo in archivosProcess:
 
             i += 1
-            list_of_dicts_lightcurve_metadata.append(get_star_lightcurve_metadata(archivo))
-            list_of_dicts_metadata.append(get_star_metadata(archivo))
+
+            star_lightcurve_metadata = get_star_lightcurve_metadata(archivo)
+            star_metadata = get_star_metadata(archivo)
+
+            if star_metadata and star_lightcurve_metadata:
+                list_of_dicts_lightcurve_metadata.append(star_lightcurve_metadata)
+                list_of_dicts_metadata.append(star_metadata)
 
             if i > 0 and i % 100 == 0:
-                print "Procesando {0} de {1}".format(i, len(archivos))
+                print "Procesando {0} de {1}".format(i, len(archivosProcess))
                 StarsDBManager().insert_star_metadata(list_of_dicts_metadata)
                 StarsDBManager().insert_star_lightcurve_metadata(list_of_dicts_lightcurve_metadata)
+
+                # Libera memoria
+                list_of_dicts_lightcurve_metadata = None
+                list_of_dicts_metadata = None
+                gc.collect()
+
                 list_of_dicts_lightcurve_metadata = []
                 list_of_dicts_metadata = []
 
@@ -222,5 +239,12 @@ if __name__ == '__main__':
             StarsDBManager().insert_star_metadata(list_of_dicts_metadata)
             StarsDBManager().insert_star_lightcurve_metadata(list_of_dicts_lightcurve_metadata)
 
+
+        list_of_dicts_lightcurve_metadata = None
+        list_of_dicts_metadata = None
+        archivos = None
+        archivosProcess = None
+
+        gc.collect()
 
         print "DONE!"

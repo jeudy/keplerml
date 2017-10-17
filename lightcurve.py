@@ -2,6 +2,7 @@ import numpy as np
 
 from astropy.io import fits
 
+
 def lightcurve(archivo):
     """
     Extrae datos relevantes de los .fits
@@ -29,6 +30,8 @@ def lightcurve(archivo):
     mom_centr2_err = datos[:, 17]
     pos_corr1 = datos[:, 18]
     pos_corr2 = datos[:, 19]
+
+    print len(sap_flux), " - ", len(sap_flux_err)
 
     hdu.close()
     return [time, timecorr, cadenceco, sap_flux, sap_flux_err, sap_bkg, sap_bkg_err, pdcsap_flux, pdcsap_flux_err, sap_quality, psf_centr1, psf_centr1_err, psf_centr2, psf_centr2_err, mom_centr1, mom_centr1_err, mom_centr2, mom_centr2_err, pos_corr1, pos_corr2]
