@@ -1,69 +1,22 @@
-import numpy as np 
+import numpy as np
 
-def dtw(x, y):
-    """ Devuelve una lista de indices que corresponden al camino mas corto entre dos se;ales temporales y la distancia 
-        de ese camino
-        
-        x y y son las funciones a las que se les aplicara el DTW
-    
+def DTWDistance(lc1, lc2):
     """
+    lc1 y lc2 son las lightcurve a las que se aplicara el DTW
+    """
+    DTW={} #DTW es un diccionario que representa una matriz de donde cada entrada representa la distancia entre dos puntos de lc1[i] y lc2[j]
 
-    distancias = np.zeros((len(y), len(x)))
-
-    x = x[~np.isnan(x)]
-    y = y[~np.isnan(y)]
-
-    for i in range(len(y)):
-        for j in range(len(x)):
-            distancias[i,j] = (y[i]-x[j])**2
-
-    costo_acumulado = np.zeros((len(y), len(x)))
-
-    costo_acumulado[0,0] = distancias[0,0]
-
-    for j in range (1, len(x)):
-        costo_acumulado[0, j]= distancias[0, j] + costo_acumulado[0, j-1]
-
-    for i in range (1, len(y)):
-        costo_acumulado[i, 0]= distancias[i, 0] + costo_acumulado[i-1, 0]
-
-    for i in range(1, len(y)):
-        for j in range(1, len(x)):
-            costo_acumulado[i, j] = min(costo_acumulado[i-1, j-1], costo_acumulado[i-1, j], costo_acumulado[i, j-1]) + distancias[i,j]
-
-    camino = [[len(x)-1, len(y)-1]]
-
-    i = len(y)-1
-    j = len(x)-1
-
-    while i > 0 and j > 0:
-        if i == 0:
-            j = j - 1
-
-        elif j == 0:
-            i = i - 1
-
-        else:
-            if costo_acumulado[i-1, j] == min(costo_acumulado[i-1, j-1], costo_acumulado[i-1, j], costo_acumulado[i, j-1]):
-                i = i - 1
-            elif costo_acumulado[i, j-1] == min(costo_acumulado[i-1, j-1], costo_acumulado[i-1, j], costo_acumulado[i, j-1]):
-                j = j - 1
-            else:
-                i = i - 1
-                j = j - 1
-
-        camino.append([j, i])
-    camino.append([0, 0])
-    lista_distancias = []
+    for i in range(len(lc1)):   #Aqui estamos diciendo que la distancia entre un punto cualquiera de una serie y el punto final de la otra es infinita
+        DTW[(i,-1)] = float('inf')
     
-    for i in range(len(camino)):
-        lista_distancias.append(distancias[camino[i][1], camino[i][0]])
-    
-    distancia_total = 0
-    for i in range(len(lista_distancias)):
-        distancia_total = distancia_total + lista_distancias[i]
-    
-    distancia_total = np.sqrt(distancia_total)
+    for i in range(len(lc2)):
+        DTW[(-1,i)] = float('inf')
 
-    return(distancia_total, camino) #El camino sirve para ver la relacion entre las se;ales (Entre mas diagonal, las se;ales son mas parecidas)
-                                    #sin enbargo que las se;ales sean similares no quiere decir que esten cerca
+    DTW[(-1,-1)] = 0    #Aqui hacemos la salvedad de que los puntos finales de las series estan a la misma distancia
+
+    for i in range(len(lc1)):   #Aqui vamos llenando la matriz, cada entrada (i, j) tiene la minima distancia para llegar a ella, por lo que la ultima entrada corresponde a la minima distancia entre lc1 y lc2
+        for j in range(len(lc2)):
+            dist = np.square(lc1[i] - lc2[j])
+            DTW[(i,j)] = dist + min(DTW[(i-1, j)], DTW[(i, j-1)], DTW[(i-1, j-1)])
+    return np.sqrt(DTW[len(lc1)-1, len(lc2)-1])
+    
